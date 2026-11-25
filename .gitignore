@@ -1,0 +1,57 @@
+node_modules/
+dist/
+# tsc is a type gate only (noEmit); Vite bundles the .ts sources directly.
+# Emitted siblings here would shadow them — Vite resolves .js before .ts.
+src/**/*.js
+.DS_Store
+*.log
+
+# Secrets. .env.example is the only env file that may be committed.
+.env
+.env.*
+!.env.example
+
+# npm's lockfile is leftover scaffolding; bun.lock is authoritative.
+package-lock.json
+
+# Cursor local state. The Cloud Agent contract stays tracked.
+.cursor/*
+!.cursor/environment.json
+!.cursor/install.sh
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*~
+
+# Caches
+.cache/
+.eslintcache
+.turbo/
+.parcel-cache/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+.nyc_output/
+htmlcov/
+
+# Benchmark dumps. The cited proof slice stays tracked
+# (docs/webgpu-embedding-proof-slice-2026-08-20.md).
+docs/benchmarks/*.json
+!docs/benchmarks/webgpu-embedding-2026-08-20.json
+
+# Task worktrees and agent session backups live inside the repo; ignoring them
+# keeps `git status` a real signal instead of thousands of untracked lines.
+.worktrees/
+.mcp.json
+public/*.wasm
+public/*.mjs
+
+# Python SDK contract tooling (task #1046)
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.ruff_cache/

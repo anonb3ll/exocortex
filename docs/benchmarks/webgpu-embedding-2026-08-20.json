@@ -1,0 +1,44 @@
+{
+  "task": "#474",
+  "generatedAt": "2026-08-20T00:23:21.844Z",
+  "environment": "bun (node bundle, cpu/cuda only)",
+  "fixtureCount": 10,
+  "resourceLimits": {
+    "embedTimeoutMs": 15000,
+    "maxInputChars": 8000
+  },
+  "legs": [
+    {
+      "backend": "cpu",
+      "reproduced": true,
+      "runs": 10,
+      "durationsMs": [
+        521.710861,
+        15.600434000000064,
+        11.757372000000032,
+        5.324573999999984,
+        10.703746000000024,
+        15.765096000000085,
+        5.43887600000005,
+        15.38775899999996,
+        7.98135000000002,
+        7.164074000000028
+      ],
+      "meanMs": 61.68341420000003,
+      "p50Ms": 11.757372000000032,
+      "p95Ms": 521.710861
+    },
+    {
+      "backend": "webgpu",
+      "reproduced": false,
+      "reason": "no window/importScripts in this Bun runtime — @huggingface/transformers loads its Node bundle here, which rejects \"webgpu\" as a device (only cpu/cuda). Proof requires a real browser context (Chrome offscreen document or the Puppeteer B*-layer).",
+      "runs": 0
+    },
+    {
+      "backend": "wasm",
+      "reproduced": false,
+      "reason": "no window/importScripts in this Bun runtime — @huggingface/transformers loads its Node bundle here, which rejects \"wasm\" as a device (only cpu/cuda). Proof requires a real browser context (Chrome offscreen document or the Puppeteer B*-layer).",
+      "runs": 0
+    }
+  ]
+}

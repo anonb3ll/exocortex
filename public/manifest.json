@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Project Exocortex",
+  "version": "0.1.0",
+  "description": "Local Footprint & Externalized Working Memory for Chrome",
+  "permissions": [
+    "tabs",
+    "storage",
+    "sidePanel",
+    "activeTab",
+    "tabGroups",
+    "offscreen",
+    "nativeMessaging"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Where Was I? - Project Exocortex",
+    "default_popup": "src/popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

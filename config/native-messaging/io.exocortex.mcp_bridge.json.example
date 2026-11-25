@@ -1,0 +1,7 @@
+{
+  "name": "io.exocortex.mcp_bridge",
+  "description": "Exocortex local MCP bridge",
+  "path": "/ABSOLUTE/PATH/TO/exocortex-native-host-wrapper",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://REPLACE_WITH_LOADED_EXTENSION_ID/"]
+}

@@ -1,0 +1,37 @@
+[project]
+name = "exocortex-sdk-contract"
+version = "0.0.0"
+description = "Exocortex Core SDK: contract (#1046) + minimal Core and existing-store seam (#1047)"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+# Opt-in proof lane (task #1048): runs the external consumer demo/tests against
+# the public Citetrail package. Not in default-groups; see
+# examples/citetrail_consumer/README.md.
+citetrail-consumer = [
+    "citetrail @ git+https://github.com/anonb3ll/citetrail.git",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "examples/citetrail_consumer"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+target-version = "py311"
+src = ["src", "tests", "examples/citetrail_consumer"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

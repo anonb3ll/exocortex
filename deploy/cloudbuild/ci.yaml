@@ -1,0 +1,22 @@
+# Exocortex CI on Google Cloud Build: the steps of .github/workflows/ci.yml,
+# for one exact commit. Submitted by scripts/cloud-ci.sh; see docs/ci.md.
+#
+# No machineType is set, on purpose. The default pool's default machine
+# (e2-standard-2) is the one the monthly free build-minute allowance covers,
+# and this suite does not need more: it is one job of a few minutes.
+substitutions:
+  _BUN_IMAGE: oven/bun:1-debian
+  _SOURCE_SHA: unknown
+steps:
+- id: build-and-test
+  name: ${_BUN_IMAGE}
+  entrypoint: bash
+  args:
+  - .ci/ci-step.sh
+  env:
+  - EXOCORTEX_CI_SOURCE_SHA=${_SOURCE_SHA}
+# A hung browser must not bill for an hour: the suite takes a few minutes.
+timeout: 1200s
+tags:
+- exocortex-ci
+- sha-${_SOURCE_SHA}

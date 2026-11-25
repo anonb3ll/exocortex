@@ -1,0 +1,30 @@
+{
+  "name": "exocortex",
+  "version": "0.1.0",
+  "description": "Project Exocortex: Local Footprint & Second Brain Chrome Extension",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && vite build --config vite.content.config.ts",
+    "preview": "vite preview",
+    "pretest": "bun run build",
+    "test": "bun test tests/"
+  },
+  "trustedDependencies": [
+    "puppeteer"
+  ],
+  "devDependencies": {
+    "@types/chrome": "^0.2.2",
+    "@types/node": "^22.0.0",
+    "fake-indexeddb": "^6.2.5",
+    "puppeteer": "^25.4.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3",
+    "@mozilla/readability": "^0.5.0",
+    "dexie": "^4.4.4"
+  }
+}
