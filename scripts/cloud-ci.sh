@@ -127,13 +127,18 @@ else
     trap 'rm -rf -- "$src"' EXIT
     git -C "$root" archive "$sha" | tar -x -C "$src"
     mkdir "$src/.ci"
-    cp "$config" "$step" "$src/.ci/"
+    cp "$config" "$step" "$root/scripts/secret-scan.sh" "$src/.ci/"
     # The build container has no Git history. Send the commit identities for
     # the selected range without printing names or addresses.
     git -C "$root" log -z --format='%H%n%an%n%ae%n%cn%n%ce%n%b' "$identity_range" \
         > "$src/.ci/commit-identities"
     if [ ! -s "$src/.ci/commit-identities" ]; then
         echo "commit identity check: selected range produced no commits" >&2
+        exit 1
+    fi
+    # Baseline files and the generated CI metadata also travel in the upload.
+    if ! bash "$src/.ci/secret-scan.sh" dir "$src"; then
+        post failure "Credential source scan failed before source upload"
         exit 1
     fi
     build="$(gcloud builds submit "$src" --config="$src/.ci/ci.yaml" --project="$project" \

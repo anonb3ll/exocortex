@@ -23,9 +23,10 @@ checks at all. `scripts/cloud-ci.sh` runs the same steps in the same order.
 
 ## What a run does
 
-1. Resolves the argument to a commit and scans its introduced Git history
-   for credentials before uploading anything. Then it exports the exact
-   commit with `git archive`. Uncommitted changes are never built.
+1. Resolves the argument to a commit, scans its introduced history, then
+   exports the exact commit with `git archive`. It scans the complete
+   source upload for credentials before submitting it. Uncommitted changes
+   are never built.
 2. Submits it to Cloud Build with `deploy/cloudbuild/ci.yaml`, which runs
    `deploy/cloudbuild/ci-step.sh` in the `oven/bun:1-debian` image:
    `bash scripts/check_commit_identity.sh` using `.ci/commit-identities`
@@ -41,9 +42,8 @@ checks at all. `scripts/cloud-ci.sh` runs the same steps in the same order.
 3. Posts `pending`, waits, then posts `success` or `failure` with a link to
    the build log. On failure it prints the last 60 lines of the log.
 
-The build config and step script come from the checkout you run the script
-from, not from the commit under test. Run it from `main` or from the head you
-are testing.
+The build config, step script, and scanner come from the checkout you run
+the script from. Run it from `main` or from the head you are testing.
 
 The status is posted from your machine with your `gh` login. No GitHub
 credential enters the build, and the build has no access to anything but the

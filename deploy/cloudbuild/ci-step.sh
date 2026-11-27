@@ -26,7 +26,7 @@ apt-get update -qq
 apt-get install -y -qq --no-install-recommends xvfb xauth unzip nodejs git ca-certificates curl >/dev/null
 echo "== node $(node --version) at $(command -v node)"
 
-bash scripts/secret-scan.sh dir .
+bash .ci/secret-scan.sh dir .
 
 bun install --frozen-lockfile
 
