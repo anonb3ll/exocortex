@@ -23,8 +23,9 @@ checks at all. `scripts/cloud-ci.sh` runs the same steps in the same order.
 
 ## What a run does
 
-1. Resolves the argument to a commit and exports exactly that commit with
-   `git archive`. Uncommitted changes in your checkout are never built.
+1. Resolves the argument to a commit and scans its introduced Git history
+   for credentials before uploading anything. Then it exports the exact
+   commit with `git archive`. Uncommitted changes are never built.
 2. Submits it to Cloud Build with `deploy/cloudbuild/ci.yaml`, which runs
    `deploy/cloudbuild/ci-step.sh` in the `oven/bun:1-debian` image:
    `bash scripts/check_commit_identity.sh` using `.ci/commit-identities`
@@ -33,7 +34,8 @@ checks at all. `scripts/cloud-ci.sh` runs the same steps in the same order.
    commits added by a PR or branch, the requested commit if it is already on
    main, or all commits reachable from the target before the first main push.
    Then CI installs system
-   packages (xvfb, unzip, Node, git) → `bun install --frozen-lockfile` →
+   packages (xvfb, unzip, Node, git, curl) → secret scan of the exported source
+   → `bun install --frozen-lockfile` →
    Puppeteer's Chrome and its libraries → `bun run build` →
    `EXOCORTEX_BROWSER_TESTS=1 EXOCORTEX_EMBEDDER_TESTS=1 xvfb-run -a bun run test`.
 3. Posts `pending`, waits, then posts `success` or `failure` with a link to
@@ -90,6 +92,7 @@ authorization step for the repository owner.
 | `still WORKING after 30 minutes` | The watcher gave up; the status stays pending. Re-attach with `--reconcile`. |
 | `build <id> was made for ... not <sha>` | The build id belongs to a different commit. Nothing was posted. |
 | `set EXOCORTEX_CI_GCP_PROJECT` | Export the project id. The script also accepts `UA_CI_GCP_PROJECT`. |
+| `Secret scan found potential credentials` | Inspect the affected commit range privately with Gitleaks. CI suppresses scanner output. |
 
 To run without posting a status (for example while changing the CI files
 themselves), set `EXOCORTEX_CI_NO_STATUS=1`. The build is still billed.
@@ -99,7 +102,7 @@ themselves), set `EXOCORTEX_CI_NO_STATUS=1`. The build is still billed.
 - `gcloud`, signed in to an account that may submit builds in the project
   (`roles/cloudbuild.builds.editor`), with the Cloud Build API enabled.
 - `gh`, signed in with permission to write commit statuses on the repository.
-- `git`, `tar` and `python3` on the machine that runs the script.
+- `git`, `tar`, `curl` and `python3` on the machine that runs the script.
 
 ## Settings
 

@@ -23,8 +23,10 @@ bash scripts/check_commit_identity.sh --file .ci/commit-identities
 # identity check's fixture, which builds throwaway repositories; the check
 # itself reads the exported .ci/commit-identities file.
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends xvfb xauth unzip nodejs git ca-certificates >/dev/null
+apt-get install -y -qq --no-install-recommends xvfb xauth unzip nodejs git ca-certificates curl >/dev/null
 echo "== node $(node --version) at $(command -v node)"
+
+bash scripts/secret-scan.sh dir .
 
 bun install --frozen-lockfile
 
