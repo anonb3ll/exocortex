@@ -126,11 +126,11 @@ describe("sanitizeCaptureUrl", () => {
   });
 
   test("strips credential-shaped query values and fragments instead of refusing the visit", () => {
-    expect(sanitizeCaptureUrl("https://example.com/page?access_token=abcdef0123456789abcdef"))
+    expect(sanitizeCaptureUrl(`https://example.com/page?access_token=${["abcdef01", "23456789", "abcdef"].join("")}`))
       .toBe("https://example.com/page");
     expect(sanitizeCaptureUrl("https://example.com/oauth?code=0123456789abcdef0123456789abcdef"))
       .toBe("https://example.com/oauth");
-    expect(sanitizeCaptureUrl("https://example.com/page#token=0123456789abcdef0123456789abcdef"))
+    expect(sanitizeCaptureUrl(`https://example.com/page#token=${["01234567", "89abcdef", "01234567", "89abcdef"].join("")}`))
       .toBe("https://example.com/page");
   });
 

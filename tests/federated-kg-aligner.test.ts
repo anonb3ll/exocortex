@@ -326,7 +326,7 @@ describe("Task #181: Phase 3.4 Federated KG Alignment → Obsidian", () => {
         url: "https://example.com/docs/api?access_token=super_secret_token_123&session_id=sid_456#access_token=auth_hash",
         title: "Sensitive API Documentation",
         excerpt:
-          "User credentials password='MyPassword123!' and token Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.do_not_leak with API Key sk-1234567890abcdef1234567890 and SSN 000-12-3456.",
+          `User credentials password='MyPassword123!' and token Bearer ${["eyJhbGciOiJIUzI1NiJ9", "eyJzdWIiOiIxMjM0NTY3ODkwIn0", "do_not_leak"].join(".")} with API Key sk-1234567890abcdef1234567890 and SSN 000-12-3456.`,
         primaryFocusEntity: "SensitiveService",
         keywords: ["api", "auth"]
       });

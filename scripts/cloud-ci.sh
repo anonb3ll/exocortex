@@ -95,34 +95,50 @@ else
             exit 1
         fi
     fi
-    src="$(mktemp -d)"
-    trap 'rm -rf -- "$src"' EXIT
-    git -C "$root" archive "$sha" | tar -x -C "$src"
-    mkdir "$src/.ci"
-    cp "$config" "$step" "$src/.ci/"
-    # The build container has no Git history. Send the commit identities for
-    # the selected range without printing names or addresses.
+    scan_base=""
     if [[ "$ref" =~ ^[0-9]+$ ]]; then
         identity_base="$(gh pr view "$ref" -R "$repo" --json baseRefOid -q .baseRefOid)"
         git -C "$root" cat-file -e "${identity_base}^{commit}" 2>/dev/null \
             || git -C "$root" fetch -q origin "$identity_base"
         identity_range="${identity_base}..${sha}"
+        scan_base="$identity_base"
     elif git -C "$root" show-ref --verify --quiet refs/remotes/origin/main; then
         identity_base="$(git -C "$root" merge-base origin/main "$sha")"
         if [ "$identity_base" = "$sha" ]; then
             # This commit is already on main. Check the requested commit.
             identity_range="${sha}^!"
+            scan_base="$(git -C "$root" rev-parse --verify "$sha^1" 2>/dev/null || true)"
         else
             identity_range="${identity_base}..${sha}"
+            scan_base="$identity_base"
         fi
     else
         # Before the first push, scan all commits reachable from the target.
         identity_range="$sha"
     fi
+    # The archive cannot show secrets added and removed in the same PR.
+    # Check history before uploading any source to the Cloud Build bucket.
+    url="https://github.com/$repo/commit/$sha"
+    if ! (cd "$root" && bash scripts/secret-scan.sh git "$sha" "$scan_base"); then
+        post failure "Credential history scan failed before source upload"
+        exit 1
+    fi
+    src="$(mktemp -d)"
+    trap 'rm -rf -- "$src"' EXIT
+    git -C "$root" archive "$sha" | tar -x -C "$src"
+    mkdir "$src/.ci"
+    cp "$config" "$step" "$root/scripts/secret-scan.sh" "$src/.ci/"
+    # The build container has no Git history. Send the commit identities for
+    # the selected range without printing names or addresses.
     git -C "$root" log -z --format='%H%n%an%n%ae%n%cn%n%ce%n%b' "$identity_range" \
         > "$src/.ci/commit-identities"
     if [ ! -s "$src/.ci/commit-identities" ]; then
         echo "commit identity check: selected range produced no commits" >&2
+        exit 1
+    fi
+    # Baseline files and the generated CI metadata also travel in the upload.
+    if ! bash "$src/.ci/secret-scan.sh" dir "$src"; then
+        post failure "Credential source scan failed before source upload"
         exit 1
     fi
     build="$(gcloud builds submit "$src" --config="$src/.ci/ci.yaml" --project="$project" \
