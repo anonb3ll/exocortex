@@ -93,6 +93,7 @@ authorization step for the repository owner.
 | `build <id> was made for ... not <sha>` | The build id belongs to a different commit. Nothing was posted. |
 | `set EXOCORTEX_CI_GCP_PROJECT` | Export the project id. The script also accepts `UA_CI_GCP_PROJECT`. |
 | `Secret scan found potential credentials` | Inspect the affected commit range privately with Gitleaks. CI suppresses scanner output. |
+| `Secret scan refuses a source .gitleaksignore` | Remove the ignore file from the scan checkout. CI does not accept checkout-defined suppression. |
 
 To run without posting a status (for example while changing the CI files
 themselves), set `EXOCORTEX_CI_NO_STATUS=1`. The build is still billed.
