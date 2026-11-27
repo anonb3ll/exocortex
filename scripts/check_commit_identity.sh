@@ -7,6 +7,9 @@
 #
 # GitHub noreply addresses, the web-flow committer name, and [bot] accounts
 # are allowed. anonb3ll@pm.me is allowed because it matches none of the rules.
+# The operator's own address is also allowed, in commit metadata only
+# (Anthony, 2026-11-27): GitHub authors a merge commit with it, so a landing
+# that goes through a pull request must not be refused for that.
 #
 # Cloud Build uploads a git archive, which has no commits. scripts/cloud-ci.sh
 # writes the same git-log stream to .ci/commit-identities and this script
@@ -50,6 +53,8 @@ fi
 # Built at runtime so this file does not contain the handle as a literal.
 name_re='anthony[[:space:]._/-]*bellino'
 handle="$(printf '%s%s' 'ant' 'mbel')"
+# Same reason: assembled, never written out.
+operator_email="$(printf '%s@%s.%s' "$handle" "$(printf '%s%s' 'gm' 'ail')" "$(printf '%s%s' 'c' 'om')")"
 
 lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
@@ -74,15 +79,25 @@ is_allowed_name() {
 
 # 0 when the value must fail the check.
 forbidden() {
-  local kind="$1" value="$2"
-  if [ "$kind" = "email" ]; then
+  local kind="$1" value="$2" email_kind=0
+  case "$kind" in
+    email | email-trailer) email_kind=1 ;;
+  esac
+  # The operator's own address is acceptable in commit METADATA (Anthony,
+  # 2026-11-27). Not in a Co-authored-by trailer, though: a merge never adds
+  # one, so a trailer claiming that identity is a fabricated co-author rather
+  # than a landing artifact.
+  if [ "$kind" = "email" ] && [ "$(lower "$value")" = "$operator_email" ]; then
+    return 1
+  fi
+  if [ "$email_kind" = 1 ]; then
     is_allowed_email "$value" && return 1
   else
     is_allowed_name "$value" && return 1
   fi
   printf '%s' "$value" | grep -E -i -q "$name_re" && return 0
   printf '%s' "$value" | grep -F -i -q -- "$handle" && return 0
-  if [ "$kind" = "email" ]; then
+  if [ "$email_kind" = 1 ]; then
     printf '%s' "$(lower "$value")" | grep -E -q '@gmail\.com$' && return 0
   fi
   return 1
@@ -122,7 +137,7 @@ check_trailer() {
     name="$rest"
     email=""
   fi
-  if forbidden name "$name" || { [ -n "$email" ] && forbidden email "$email"; }; then
+  if forbidden name "$name" || { [ -n "$email" ] && forbidden email-trailer "$email"; }; then
     note "$sha" "co-authored-by"
   fi
 }
