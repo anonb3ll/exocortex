@@ -8,8 +8,8 @@
 # GitHub noreply addresses, the web-flow committer name, and [bot] accounts
 # are allowed. anonb3ll@pm.me is allowed because it matches none of the rules.
 # The operator's own address is also allowed, in commit metadata only
-# (Anthony, 2026-11-27): GitHub authors a merge commit with it, so a landing
-# that goes through a pull request must not be refused for that.
+# (operator's ruling, 2026-11-27): GitHub authors a merge commit with it, so a
+# landing that goes through a pull request must not be refused for that.
 #
 # Cloud Build uploads a git archive, which has no commits. scripts/cloud-ci.sh
 # writes the same git-log stream to .ci/commit-identities and this script
@@ -50,8 +50,11 @@ if [ -z "$range" ] && [ -z "$file" ]; then
   exit 2
 fi
 
-# Built at runtime so this file does not contain the handle as a literal.
-name_re='anthony[[:space:]._/-]*bellino'
+# Built at runtime so this file contains neither the name nor the handle as a
+# literal: it is a tracked file in a public repository, and the operator's
+# metadata exception covers commits, not file content.
+name_re="$(printf '%s[[:space:]._/-]*%s' \
+  "$(printf '%s%s' 'Anth' 'ony')" "$(printf '%s%s' 'Bell' 'ino')")"
 handle="$(printf '%s%s' 'ant' 'mbel')"
 # Same reason: assembled, never written out.
 operator_email="$(printf '%s@%s.%s' "$handle" "$(printf '%s%s' 'gm' 'ail')" "$(printf '%s%s' 'c' 'om')")"
@@ -83,7 +86,7 @@ forbidden() {
   case "$kind" in
     email | email-trailer) email_kind=1 ;;
   esac
-  # The operator's own address is acceptable in commit METADATA (Anthony,
+  # The operator's own address is acceptable in commit METADATA (ruling of
   # 2026-11-27). Not in a Co-authored-by trailer, though: a merge never adds
   # one, so a trailer claiming that identity is a fabricated co-author rather
   # than a landing artifact.
