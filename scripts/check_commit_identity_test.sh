@@ -98,6 +98,27 @@ GIT_AUTHOR_NAME='anonb3ll' \
   git -C "$repo" commit -q --allow-empty -m 'planted'
 rejects "$repo" "$base" "$(head_of "$repo")" 'another Gmail author' 'author-email' "$secret"
 
+# The exemption is exact, so a look-alike that merely shares the handle, or a
+# +tag variant of the mailbox, is still refused. Without these two cases a
+# substring or prefix match would pass.
+repo=$work/lookalike
+new_repo "$repo"
+base=$(base_of "$repo")
+secret=$(gmail "not-$(handle)")
+GIT_AUTHOR_NAME='Ant' \
+  GIT_AUTHOR_EMAIL="$secret" \
+  git -C "$repo" commit -q --allow-empty -m 'look-alike'
+rejects "$repo" "$base" "$(head_of "$repo")" 'handle-prefix look-alike' 'author-email' "$secret"
+
+repo=$work/plustag
+new_repo "$repo"
+base=$(base_of "$repo")
+secret=$(gmail "$(handle)+work")
+GIT_AUTHOR_NAME='Ant' \
+  GIT_AUTHOR_EMAIL="$secret" \
+  git -C "$repo" commit -q --allow-empty -m '+tag variant'
+rejects "$repo" "$base" "$(head_of "$repo")" '+tag variant' 'author-email' "$secret"
+
 # The retired name still fails even when the address is a noreply one.
 repo=$work/name
 new_repo "$repo"

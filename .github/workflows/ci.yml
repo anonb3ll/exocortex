@@ -30,6 +30,9 @@ jobs:
             bash scripts/check_commit_identity.sh --range "${{ github.sha }}"
           fi
 
+      - name: Commit identity gate self-test
+        run: bash scripts/check_commit_identity_test.sh
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
