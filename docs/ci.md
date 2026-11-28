@@ -35,7 +35,10 @@ checks at all. `scripts/cloud-ci.sh` runs the same steps in the same order.
    commits added by a PR or branch, the requested commit if it is already on
    main, or all commits reachable from the target before the first main push.
    Then CI installs system
-   packages (xvfb, unzip, Node, git, curl) → secret scan of the exported source
+   packages (xvfb, unzip, Node, git, curl), runs the identity gate's own suite
+   (`bash scripts/check_commit_identity_test.sh`; it needs the git that step
+   just installed, because every case builds a throwaway repository), then
+   secret-scans the exported source
    → `bun install --frozen-lockfile` →
    Puppeteer's Chrome and its libraries → `bun run build` →
    `EXOCORTEX_BROWSER_TESTS=1 EXOCORTEX_EMBEDDER_TESTS=1 xvfb-run -a bun run test`.

@@ -156,4 +156,14 @@ if [ "$code" -ne 0 ]; then
   fail "--file mode rejected the operator identity: $output"
 fi
 
+# The gate's own source is a tracked file in a public repository, so it must
+# carry neither half of the retired name nor the handle as a literal. This is
+# the regression test for the name that used to be written out at :54 while the
+# comment above it claimed runtime assembly.
+for literal in "$(printf '%s%s' 'anth' 'ony')" "$(printf '%s%s' 'bell' 'ino')" "$(handle)"; do
+  if grep -F -i -q -- "$literal" "$check"; then
+    fail 'the gate source contains an identity literal'
+  fi
+done
+
 printf 'check_commit_identity_test: ok\n'

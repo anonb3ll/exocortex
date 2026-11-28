@@ -14,6 +14,11 @@ if [ ! -s .ci/commit-identities ]; then
   exit 1
 fi
 bash scripts/check_commit_identity.sh --file .ci/commit-identities
+# The gate's own suite runs further down, after the toolchain is installed: its
+# fixtures build throwaway git repositories, and this image ships no git until
+# the apt step below. Putting it here failed the build with `git: command not
+# found` (127), which is the honest failure - a suite that skipped when git was
+# missing would be a test nobody runs.
 
 # xvfb gives the real-browser (B*) layer a disposable display; xauth is what
 # xvfb-run needs, and unzip is what Puppeteer unpacks Chrome with. nodejs is
@@ -25,6 +30,12 @@ bash scripts/check_commit_identity.sh --file .ci/commit-identities
 apt-get update -qq
 apt-get install -y -qq --no-install-recommends xvfb xauth unzip nodejs git ca-certificates curl >/dev/null
 echo "== node $(node --version) at $(command -v node)"
+
+# Now that git exists, the identity gate's own suite can run: every case builds
+# a throwaway repository. Cloud Build is the only CI this tree has, so without
+# this line the suite would be dead weight (review of #3).
+echo "== commit identity gate self-test"
+bash scripts/check_commit_identity_test.sh
 
 bash .ci/secret-scan.sh dir .
 
